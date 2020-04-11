@@ -1,0 +1,19 @@
+{
+  "name": "harubase",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "sokcuri",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "globby": "^11.0.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^13.7.4",
+    "@types/tape": "^4.2.34",
+    "tape": "^4.13.0"
+  }
+}
