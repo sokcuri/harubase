@@ -1,9 +1,9 @@
 {
     "name": "harubase",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "main": "index.js",
+    "types": "index.d.ts",
     "author": "sokcuri",
     "license": "ISC",
     "scripts": {
@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "discord.js": "^11.5.1",
+        "fast-glob": "^3.2.2",
         "globby": "^11.0.0",
         "ts-node": "^8.6.2",
         "typescript": "^3.8.2"
@@ -26,6 +27,7 @@
         "tslint-config-prettier": "^1.18.0"
     },
     "files": [
-        "/*.d.ts", "/*.js"
+        "/*.d.ts",
+        "/*.js"
     ]
 }

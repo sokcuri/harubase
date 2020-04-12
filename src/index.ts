@@ -1,64 +1,68 @@
-import path from 'path';
-import discord from 'discord.js';
 import { EventEmitter } from 'events';
-import * as I from './interface';
+import { Module, ModuleObject, HaruBaseArgs, CommandPair } from './interface';
+
+import discord from 'discord.js';
 
 export class HaruBase extends EventEmitter {
   private client: discord.Client;
-  private modules: I.Module[];
-  private args: I.HaruBaseArgs;
-  private command: any[];
+  private modules: Module[];
+  private args: HaruBaseArgs;
 
-  constructor(args: I.HaruBaseArgs) {
+  constructor(args: HaruBaseArgs) {
     super();
 
     this.args = args;
-  }
-
-  public async setup() {
-    this.command = await import(path.join(this.args.modulePath, 'index.ts'));
-
-    this.client = new discord.Client();
-    this.client.on('ready', this.ready.bind(this));
-    this.client.on('message', this.processMessage.bind(this));
-    this.client.login(this.args.discordKey);
-  }
-
-  public ready(channel: discord.Channel) {
-    this.registerMessage();
-  }
-
-  public registerMessage() {
-    this.modules = Object.keys(this.command).map((key) => new this.command[key]());
+    this.modules = [];
   }
 
   private isExistChannelList(channels: string[], id: string) {
     return !!channels?.filter((x) => x === id).length;
   }
 
-  public checkAvailableChannel(inst: I.Module, message: discord.Message) {
+  public setup() {
+    this.client = new discord.Client();
+    this.client.on('ready', this.ready.bind(this));
+    this.client.on('message', this.processMessage.bind(this));
+    this.client.login(this.args.discordKey);
+  }
+
+  public async ready(channel: discord.Channel) {
+    await this.registerMessage();
+    this.emit('ready', channel);
+  }
+
+  public async registerMessage() {
+    for (const entry of this.args.moduleEntries) {
+      const obj: ModuleObject = await import(entry.path);
+      const [k, v] = Object.entries(obj)[0];
+      this.modules.push(new v);
+    }
+  }
+
+  public checkAvailableChannel(inst: Module, message: discord.Message) {
     const channels = inst.channels;
 
-    // is channel whitelists
     if (this.isExistChannelList(channels, '*')) {
       return true;
     }
 
-    const result = this.isExistChannelList(channels, message.channel.id);
-    return result;
+    return this.isExistChannelList(channels, message.channel.id);
   }
 
   public processMessage(message: discord.Message) {
     if (!message.author.equals(this.client.user)) {
       this.modules
         .filter((inst) => inst.active)
-        .every((inst) =>
-          this.checkAvailableChannel(inst, message) ? inst.doMessage(this, message, this.parseCommand(message)) : true,
-        );
+        .every((inst) => {
+          if (this.checkAvailableChannel(inst, message)) {
+            return inst.doMessage(this, message, this.parseCommand(message));
+          }
+      });
     }
+    this.emit('message', message);
   }
 
-  public parseCommand(message: discord.Message): I.CommandPair {
+  public parseCommand(message: discord.Message): CommandPair {
     const regex = /<@[^>].+>\s?/;
     const content = message.content.replace(regex, '').split(' ');
     return {
