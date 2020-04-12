@@ -13,9 +13,7 @@ export interface Module {
   doMessage: (harubase: HaruBase, message: discord.Message, commandPair?: CommandPair) => boolean;
 }
 
-export interface Newable {
-  new(...args: any[]): any;
-}
+type Newable = new(...args: never[]) => never;
 
 export interface ModuleObject {
   [name: string]: Module & Newable;

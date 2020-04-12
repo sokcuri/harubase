@@ -15,31 +15,31 @@ export class HaruBase extends EventEmitter {
     this.modules = [];
   }
 
-  private isExistChannelList(channels: string[], id: string) {
+  private isExistChannelList(channels: string[], id: string): boolean {
     return !!channels?.filter((x) => x === id).length;
   }
 
-  public setup() {
+  public setup(): void {
     this.client = new discord.Client();
     this.client.on('ready', this.ready.bind(this));
     this.client.on('message', this.processMessage.bind(this));
     this.client.login(this.args.discordKey);
   }
 
-  public async ready(channel: discord.Channel) {
+  public async ready(channel: discord.Channel): Promise<void> {
     await this.registerMessage();
     this.emit('ready', channel);
   }
 
-  public async registerMessage() {
+  public async registerMessage(): Promise<void> {
     for (const entry of this.args.moduleEntries) {
       const obj: ModuleObject = await import(entry.path);
-      const [k, v] = Object.entries(obj)[0];
+      const [, v] = Object.entries(obj)[0];
       this.modules.push(new v);
     }
   }
 
-  public checkAvailableChannel(inst: Module, message: discord.Message) {
+  public checkAvailableChannel(inst: Module, message: discord.Message): boolean {
     const channels = inst.channels;
 
     if (this.isExistChannelList(channels, '*')) {
@@ -49,7 +49,7 @@ export class HaruBase extends EventEmitter {
     return this.isExistChannelList(channels, message.channel.id);
   }
 
-  public processMessage(message: discord.Message) {
+  public processMessage(message: discord.Message): void {
     if (!message.author.equals(this.client.user)) {
       this.modules
         .filter((inst) => inst.active)
@@ -66,7 +66,7 @@ export class HaruBase extends EventEmitter {
     const regex = /<@[^>].+>\s?/;
     const content = message.content.replace(regex, '').split(' ');
     return {
-      command: content.shift()!.toLowerCase(),
+      command: content.shift()?.toLowerCase(),
       arguments: content,
     };
   }
