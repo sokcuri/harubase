@@ -1,6 +1,6 @@
 {
     "name": "harubase",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "",
     "main": "index.js",
     "types": "index.d.ts",
@@ -10,6 +10,13 @@
         "build": "tsc",
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "tslint -p tsconfig.json"
+    },
+    "peerDependencies": {
+        "discord.js": "^11.5.1",
+        "fast-glob": "^3.2.2",
+        "globby": "^11.0.0",
+        "ts-node": "^8.6.2",
+        "typescript": "^3.8.2"
     },
     "dependencies": {
         "discord.js": "^11.5.1",
