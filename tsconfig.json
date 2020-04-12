@@ -4,7 +4,10 @@
       "module": "commonjs",
       "target": "es2019",
       "esModuleInterop": true,
-      "resolveJsonModule": true
-    }
+      "resolveJsonModule": true,
+      "outDir": "./lib",
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
   }
   

@@ -5,6 +5,11 @@
   "main": "index.js",
   "author": "sokcuri",
   "license": "ISC",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
+  },
   "dependencies": {
     "discord.js": "^11.5.1",
     "globby": "^11.0.0",
@@ -14,6 +19,10 @@
   "devDependencies": {
     "@types/node": "^13.7.4",
     "@types/tape": "^4.2.34",
-    "tape": "^4.13.0"
-  }
+    "prettier": "^2.0.4",
+    "tape": "^4.13.0",
+    "tslint": "^6.1.1",
+    "tslint-config-prettier": "^1.18.0"
+  },
+  "files": ["lib/**/*"]
 }
