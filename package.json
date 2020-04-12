@@ -26,6 +26,6 @@
         "tslint-config-prettier": "^1.18.0"
     },
     "files": [
-        "lib/**/*"
+        "/*.d.ts", "/*.js"
     ]
 }
