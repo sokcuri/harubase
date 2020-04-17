@@ -54,9 +54,8 @@ export class HaruBase extends EventEmitter {
       this.modules
         .filter((inst) => inst.active)
         .every((inst) => {
-          if (this.checkAvailableChannel(inst, message)) {
-            return inst.doMessage(this, message, this.parseCommand(message));
-          }
+          return this.checkAvailableChannel(inst, message) ?
+            inst.doMessage(this, message, this.parseCommand(message)) : true;
       });
     }
     this.emit('message', message);
