@@ -10,7 +10,7 @@ export interface Module {
 
   channels: string[];
 
-  doMessage: (harubase: HaruBase, message: discord.Message, commandPair?: CommandPair) => boolean;
+  doMessage: (harubase: HaruBase, message: discord.Message, commandPair?: CommandPair) => Promise<boolean>;
 }
 
 type Newable = new(...args: never[]) => never;
