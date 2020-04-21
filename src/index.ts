@@ -34,7 +34,10 @@ export class HaruBase extends EventEmitter {
   public async registerMessage(): Promise<void> {
     for (const entry of this.args.moduleEntries) {
       const obj: ModuleObject = await import(entry.path);
-      const [, v] = Object.entries(obj)[0];
+      const [k, v] = Object.entries(obj)[0];
+      if (entry.name.indexOf(k) === -1) {
+        throw new Error('module name must be the same as the export function name');
+      }
       this.modules.push(new v);
     }
   }
