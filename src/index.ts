@@ -19,6 +19,10 @@ export class HaruBase extends EventEmitter {
     return !!channels?.filter((x) => x === id).length;
   }
 
+  private getActiveModules(): Module[] {
+    return this.modules.filter((inst) => inst.active);
+  }
+
   public setup(): void {
     this.client = new discord.Client();
     this.client.on('ready', this.ready.bind(this));
@@ -52,14 +56,14 @@ export class HaruBase extends EventEmitter {
     return this.isExistChannelList(channels, message.channel.id);
   }
 
-  public processMessage(message: discord.Message): void {
+  public async processMessage(message: discord.Message): Promise<void> {
     if (!message.author.equals(this.client.user)) {
-      this.modules
-        .filter((inst) => inst.active)
-        .every(async (inst) => {
-          return this.checkAvailableChannel(inst, message) ?
-            await inst.doMessage(this, message, this.parseCommand(message)) : true;
-      });
+      for (const inst of this.getActiveModules()) {
+        if (this.checkAvailableChannel(inst, message)) {
+          const result = await inst.doMessage(this, message, this.parseCommand(message));
+          if (!result) break;
+        }
+      }
     }
     this.emit('message', message);
   }
