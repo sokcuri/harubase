@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Module, ModuleObject, HaruBaseArgs, CommandPair } from './interface';
+import { Module, ModuleObject, HaruBaseArgs } from './interface';
 
 import discord from 'discord.js';
 
@@ -60,21 +60,20 @@ export class HaruBase extends EventEmitter {
     if (!message.author.equals(this.client.user)) {
       for (const inst of this.getActiveModules()) {
         if (this.checkAvailableChannel(inst, message)) {
-          const result = await inst.doMessage(this, message, this.parseCommand(message));
-          if (!result) break;
+          const { cmd, args } = this.parseCommand(message);
+          const result = await inst.message(message, cmd, args);
+          if (result) break;
         }
       }
     }
     this.emit('message', message);
   }
 
-  public parseCommand(message: discord.Message): CommandPair {
+  public parseCommand(message: discord.Message) {
     const regex = /<@[^>].+>\s?/;
-    const content = message.content.replace(regex, '').split(' ');
-    return {
-      command: content.shift()?.toLowerCase(),
-      arguments: content,
-    };
+    const args = message.content.replace(regex, '').split(' ');
+    const cmd = args.shift()?.toLowerCase();
+    return { cmd, args };
   }
 }
 

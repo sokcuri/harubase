@@ -1,4 +1,3 @@
-import HaruBase from '.';
 import discord from 'discord.js';
 import { Entry } from 'fast-glob';
 
@@ -9,19 +8,13 @@ export interface Module {
   name: string;
 
   channels: string[];
-
-  doMessage: (harubase: HaruBase, message: discord.Message, commandPair?: CommandPair) => Promise<boolean>;
+  message: (msg: discord.Message, cmd: string, args: string[]) => Promise<boolean>;
 }
 
 type Newable = new(...args: never[]) => never;
 
 export interface ModuleObject {
   [name: string]: Module & Newable;
-}
-
-export interface CommandPair {
-  command: string;
-  arguments?: string[];
 }
 
 export interface HaruBaseArgs {
