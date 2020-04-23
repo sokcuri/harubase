@@ -4,7 +4,7 @@ import { Module, ModuleObject, HaruBaseArgs } from './interface';
 import discord from 'discord.js';
 
 export class HaruBase extends EventEmitter {
-  private client: discord.Client;
+  public client: discord.Client;
   private modules: Module[];
   private args: HaruBaseArgs;
 
