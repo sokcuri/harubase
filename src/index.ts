@@ -15,27 +15,51 @@ export class HaruBase extends EventEmitter {
     this.modules = [];
   }
 
-  private isExistChannelList(channels: string[], id: string): boolean {
-    return !!channels?.filter((x) => x === id).length;
-  }
-
-  private getActiveModules(): Module[] {
-    return this.modules.filter((inst) => inst.active);
-  }
-
   public setup(): void {
+    this.modules = [];
+
     this.client = new discord.Client();
-    this.client.on('ready', this.ready.bind(this));
-    this.client.on('message', this.processMessage.bind(this));
+    this.client.once('ready', () => this.init());
+    this.client.on('ready', (channel: discord.Channel) => this.ready(channel));
+    this.client.on('message', (message: discord.Message) => this.message(message));
     this.client.login(this.args.discordKey);
   }
 
-  public async ready(channel: discord.Channel): Promise<void> {
-    await this.registerMessage();
+  private async init(): Promise<void> {
+    await this.register();
+  }
+
+  private async ready(channel: discord.Channel): Promise<void> {
     this.emit('ready', channel);
   }
 
-  public async registerMessage(): Promise<void> {
+  private async message(message: discord.Message): Promise<void> {
+    const checkExistChannel = (channels: string[], id: string): boolean => {
+      return !!channels?.filter((x) => x === id).length;
+    };
+
+    const checkAvailableChannel = (inst: Module, message: discord.Message): boolean => {
+      return checkExistChannel(inst.channels, '*') ||
+        checkExistChannel(inst.channels, message.channel.id);
+    };
+
+    const getActiveModules = (): Module[] => {
+      return this.modules.filter((inst) => inst.active);
+    };
+
+    if (!message.author.equals(this.client.user)) {
+      for (const inst of getActiveModules()) {
+        if (checkAvailableChannel(inst, message)) {
+          const { cmd, args } = this.parse(message);
+          const result = await inst.message(message, cmd, args);
+          if (result) break;
+        }
+      }
+    }
+    this.emit('message', message);
+  }
+
+  private async register(): Promise<void> {
     for (const entry of this.args.moduleEntries) {
       const obj: ModuleObject = await import(entry.path);
       const [k, v] = Object.entries(obj)[0];
@@ -46,30 +70,7 @@ export class HaruBase extends EventEmitter {
     }
   }
 
-  public checkAvailableChannel(inst: Module, message: discord.Message): boolean {
-    const channels = inst.channels;
-
-    if (this.isExistChannelList(channels, '*')) {
-      return true;
-    }
-
-    return this.isExistChannelList(channels, message.channel.id);
-  }
-
-  public async processMessage(message: discord.Message): Promise<void> {
-    if (!message.author.equals(this.client.user)) {
-      for (const inst of this.getActiveModules()) {
-        if (this.checkAvailableChannel(inst, message)) {
-          const { cmd, args } = this.parseCommand(message);
-          const result = await inst.message(message, cmd, args);
-          if (result) break;
-        }
-      }
-    }
-    this.emit('message', message);
-  }
-
-  public parseCommand(message: discord.Message) {
+  private parse(message: discord.Message) {
     const regex = /<@[^>].+>\s?/;
     const args = message.content.replace(regex, '').split(' ');
     const cmd = args.shift()?.toLowerCase();
