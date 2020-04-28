@@ -7,12 +7,14 @@ export class HaruBase extends EventEmitter {
   public client: discord.Client;
   private modules: Module[];
   private args: HaruBaseArgs;
+  private latestMessages: discord.Message[];
 
   constructor(args: HaruBaseArgs) {
     super();
 
     this.args = args;
     this.modules = [];
+    this.latestMessages = [];
   }
 
   public setup(): void {
@@ -46,6 +48,23 @@ export class HaruBase extends EventEmitter {
     const getActiveModules = (): Module[] => {
       return this.modules.filter((inst) => inst.active);
     };
+
+    if (this.latestMessages.filter(x => x.id === message.id).length) {
+      return;
+    }
+
+    const removeIdxs: number[] = [];
+
+    for (const latestMsg of this.latestMessages) {
+      if (new Date().getTime() - latestMsg.createdAt.getTime() > 60000) {
+        const idx = this.latestMessages.findIndex(x => x.id === latestMsg.id);
+        removeIdxs.push(idx);
+      }
+    }
+
+    for (const idx of removeIdxs) {
+      this.latestMessages.splice(idx, 1);
+    }
 
     if (!message.author.equals(this.client.user)) {
       for (const inst of getActiveModules()) {
