@@ -24,6 +24,8 @@ export class HaruBase extends EventEmitter {
     this.client.once('ready', () => this.init());
     this.client.on('ready', (channel: discord.Channel) => this.ready(channel));
     this.client.on('message', (message: discord.Message) => this.message(message));
+    this.client.on('error', console.log);
+
     this.client.login(this.args.discordKey);
   }
 
